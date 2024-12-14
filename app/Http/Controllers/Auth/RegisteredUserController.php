@@ -33,18 +33,24 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'staff_id' => ['nullable', 'string', 'max:8', 'unique:users'],  // Ensure staff_id is validated if present
         ]);
 
+        // Create the user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'staff_id' => $request->staff_id, // Store the staff_id if provided
         ]);
 
+        // Trigger the Registered event
         event(new Registered($user));
 
+        // Log the user in
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Redirect to the Staff Login page with a success message
+        return redirect()->route('staff.login')->with('success', 'Registration successful. Please log in.');
     }
 }
