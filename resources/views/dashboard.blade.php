@@ -13,64 +13,83 @@
         .shadow-50 {
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
+        .hidden-div {
+            display: none;
+            height: 2.5rem; /* Adjust the height to match the height of the text */
+        }
     </style>
     <script>
-        function toggleGPAField() {
-            const scholarshipType = document.getElementById('scholarshipType').value;
-            const gpaField = document.getElementById('gpaField');
-            const categoryField = document.getElementById('categoryField');
-            if (scholarshipType === 'Academic Scholars') {
-                gpaField.classList.remove('hidden');
-                categoryField.classList.remove('hidden');
-            } else {
-                gpaField.classList.add('hidden');
-                categoryField.classList.add('hidden');
-            }
+    function toggleGPAField() {
+        const scholarshipType = document.getElementById('scholarshipType').value;
+        const gpaField = document.getElementById('gpaField');
+        const categoryField = document.getElementById('categoryField');
+        if (scholarshipType === 'Academic Scholars') {
+            gpaField.classList.remove('hidden');
+            categoryField.classList.remove('hidden');
+        } else {
+            gpaField.classList.add('hidden');
+            categoryField.classList.add('hidden');
+        }
+    }
+
+    function setCategory() {
+        const gpa = parseFloat(document.getElementById('gpa').value);
+        const category = document.getElementById('category');
+        if (gpa >= 98 && gpa <= 100) {
+            category.value = 'Category 1';
+        } else if (gpa >= 95 && gpa <= 97) {
+            category.value = 'Category 2';
+        } else if (gpa >= 90 && gpa <= 94) {
+            category.value = 'Category 3';
+        } else {
+            category.value = '';
+        }
+    }
+
+    function validateForm(event) {
+        const scholarshipType = document.getElementById('scholarshipType').value;
+        const studentId = document.getElementById('studentId').value.trim();
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const course = document.getElementById('course').value.trim();
+        const yearLevel = document.getElementById('yearLevel').value.trim();
+        const gpa = parseFloat(document.getElementById('gpa').value);
+
+        if (!studentId || !firstName || !lastName || !course || !yearLevel || (scholarshipType === 'Academic Scholars' && !gpa)) {
+            alert('Please fill in all required fields.');
+            event.preventDefault();
+            return;
         }
 
-        function setCategory() {
-            const gpa = parseFloat(document.getElementById('gpa').value);
-            const category = document.getElementById('category');
-            if (gpa >= 98 && gpa <= 100) {
-                category.value = 'Category 1';
-            } else if (gpa >= 95 && gpa <= 97) {
-                category.value = 'Category 2';
-            } else if (gpa >= 90 && gpa <= 94) {
-                category.value = 'Category 3';
-            } else {
-                category.value = '';
-            }
+        if (scholarshipType === 'Academic Scholars' && gpa < 90) {
+            alert('GPA must be 90 or above for Academic Scholars.');
+            event.preventDefault();
+            return;
         }
 
-        function validateForm(event) {
-            const scholarshipType = document.getElementById('scholarshipType').value;
-            const studentId = document.getElementById('studentId').value.trim();
-            const firstName = document.getElementById('firstName').value.trim();
-            const lastName = document.getElementById('lastName').value.trim();
-            const course = document.getElementById('course').value.trim();
-            const yearLevel = document.getElementById('yearLevel').value.trim();
-            const gpa = parseFloat(document.getElementById('gpa').value);
+        // Show success popup
+        document.getElementById('successPopup').classList.remove('hidden');
+        setTimeout(() => {
+            document.getElementById('successPopup').classList.add('hidden');
+        }, 2000); // Hide after 2 seconds
+    }
 
-            if (!studentId || !firstName || !lastName || !course || !yearLevel || (scholarshipType === 'Academic Scholars' && !gpa)) {
-                alert('Please fill in all required fields.');
-                event.preventDefault();
-                return;
-            }
+    function openModal() {
+        document.getElementById('scholarModal').classList.remove('hidden');
+    }
 
-            if (scholarshipType === 'Academic Scholars' && gpa < 90) {
-                alert('GPA must be 90 or above for Academic Scholars.');
-                event.preventDefault();
-            }
-        }
+    function closeModal() {
+        document.getElementById('scholarModal').classList.add('hidden');
+    }
+</script>
 
-        function openModal() {
-            document.getElementById('scholarModal').classList.remove('hidden');
-        }
+<!-- Success Popup -->
+<div id="successPopup" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-50 w-1/3 text-center">
+        <p class="text-green-600 font-bold">Added Successfully!</p>
+    </div>
+</div>
 
-        function closeModal() {
-            document.getElementById('scholarModal').classList.add('hidden');
-        }
-    </script>
 </head>
 <body class="bg-gray-100">
     <div class="min-h-screen flex flex-col">
@@ -82,14 +101,21 @@
                     <li><a href="#" class="hover:underline">Home</a></li>
                     <li><a href="#" onclick="openModal()" class="hover:underline">Manage Scholarships</a></li>
                     <li><a href="#" class="hover:underline">Profile</a></li>
-                    <li><a href="#" class="hover:underline">Logout</a></li>
-                </ul>                
+                    <li>
+                        <!-- Logout Link -->
+                        <form action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="hover:underline">Logout</button>
+                        </form>
+                    </li>
+                </ul>
             </nav>
         </header>
 
-        <!-- Main Form Section -->
+        <!-- Welcome Message (Hidden Div) -->
+        <div class="hidden-div"></div>
         <div class="p-6 max-w-4xl mx-auto mt-10 bg-white rounded-lg shadow-50">
-            <h2 class="text-2xl font-bold mb-6">Scholar Details</h2>
+            <h2 class="text-2xl font-bold mb-6">Welcome, {{ Str::before(Auth::user()->name, ' ') }}!</h2>
             <form onsubmit="validateForm(event)">
                 <div class="mb-4">
                     <label for="scholarshipType" class="block text-sm font-medium text-gray-700">Select Scholarship Type</label>
@@ -135,36 +161,22 @@
                             <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
                             <input type="text" id="category" name="category" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border border-black border-opacity-10 shadow-50" readonly>
                         </div>
-                        <div class="flex justify-end">
-                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Add Scholar</button>
-                        </div>
                     </div>
                 </div>
+
+                <button type="submit" class="mt-4 w-full py-2 px-4 bg-blue-600 text-white font-bold rounded-md">Submit</button>
             </form>
         </div>
 
-        <!-- Popup Modal -->
-        <div id="scholarModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
-            <div class="bg-white p-6 rounded-lg w-full max-w-4xl relative">
-                <div class="flex justify-between items-center border-b pb-2 mb-4">
-                    <h2 class="text-xl font-bold">Scholar Details</h2>
-                    <button onclick="closeModal()" class="text-red-500 text-lg font-bold">&times;</button>
-                </div>
-                <div id="scholarContent" class="overflow-auto max-h-96">
-                    <p>Loading...</p>
-                </div>
-                <div class="flex justify-end pt-4">
-                    <button onclick="closeModal()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
-                        Close
-                    </button>
-                </div>
+        <!-- Modal for Managing Scholarships -->
+        <div id="scholarModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div class="bg-white p-6 rounded-lg w-1/3 shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Manage Scholarships</h3>
+                <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-700">×</button>
+                <!-- Modal content -->
+                <p>Scholarship Management Options Here...</p>
             </div>
         </div>
-
-        <!-- Footer -->
-        <footer class="bg-blue-600 text-white p-4 text-center">
-            <p>&copy; 2024 ScholarPath. All rights reserved.</p>
-        </footer>
     </div>
 </body>
 </html>

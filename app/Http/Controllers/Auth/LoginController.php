@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
@@ -35,21 +34,38 @@ class LoginController extends Controller
      */
     public function login(Request $request)
     {
-        // Validate the request
+        // Validate the staff_id and password
         $request->validate([
-            'email' => 'required|email',
+            'staff_id' => 'required|numeric',  // Ensure staff_id is numeric
             'password' => 'required|min:8',
         ]);
 
-        // Attempt to log the user in
-        if (Auth::attempt($request->only('email', 'password'))) {
-            // Redirect the user to the specified $redirectTo property
+        // Attempt to log the user in using the staff_id and password
+        if (Auth::attempt(['staff_id' => $request->staff_id, 'password' => $request->password])) {
+            // Redirect the user to the intended page or dashboard
             return redirect()->intended($this->redirectTo);
         }
 
         // If authentication fails, redirect back with an error
         throw ValidationException::withMessages([
-            'email' => ['These credentials do not match our records.'],
+            'staff_id' => ['These credentials do not match our records.'],
         ]);
+    }
+
+    /**
+     * Handle the logout request.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout(); // Log out the user
+
+        // Invalidate the session and regenerate the session ID to protect against session fixation attacks
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect the user to the login page
+        return redirect()->route('staff.login');
     }
 }

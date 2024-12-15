@@ -25,7 +25,19 @@
                 <h1 class="text-4xl font-bold text-blue-600">ScholarPath</h1>
                 <p class="text-gray-700">Scholarship Office Staff Login</p>
             </div>
-            <form action="{{ route('login') }}" method="POST">
+
+            <!-- Display validation errors -->
+            @if ($errors->any())
+                <div class="mb-4 bg-red-100 text-red-700 p-4 rounded">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form action="{{ route('staff.login') }}" method="POST">
                 @csrf
                 <div class="mb-6">
                     <label class="block text-gray-700 font-medium" for="staff-id">Staff ID Number</label>
@@ -36,9 +48,13 @@
                         placeholder="Enter your ID" 
                         required 
                         type="number" 
-                        min="0" />
-                    <p class="text-red-500 text-sm mt-1 hidden" id="staff-id-error">Please enter a valid Staff ID Number.</p>
+                        min="0" 
+                        value="{{ old('staff_id') }}" />
+                    @error('staff_id')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div class="mb-6">
                     <label class="block text-gray-700 font-medium" for="password">Password</label>
                     <input 
@@ -48,8 +64,11 @@
                         placeholder="Enter your password" 
                         required 
                         type="password" />
-                    <p class="text-red-500 text-sm mt-1 hidden" id="password-error">Password is required.</p>
+                    @error('password')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center">
                         <input 
@@ -61,12 +80,14 @@
                     </div>
                     <a class="text-sm text-blue-600 hover:underline" href="{{ route('password.request') }}">Forgot your password?</a>
                 </div>
+
                 <button 
                     class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" 
                     type="submit">
                     Login
                 </button>
             </form>
+
             <p class="mt-8 text-center text-gray-700">Don't have an account? <a class="text-blue-600 hover:underline" href="{{ route('register') }}">Register</a></p>
         </div>
     </div>

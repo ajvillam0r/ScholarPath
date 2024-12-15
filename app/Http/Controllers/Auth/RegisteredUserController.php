@@ -9,48 +9,51 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Show the registration form.
+     *
+     * @return \Illuminate\View\View
      */
     public function create(): View
     {
-        return view('auth.register');
+        return view('auth.register'); // Assuming your registration form is located at resources/views/auth/register.blade.php
     }
 
     /**
      * Handle an incoming registration request.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validate input fields
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'staff_id' => ['nullable', 'string', 'max:8', 'unique:users'],  // Ensure staff_id is validated if present
+            'staff_id' => 'required|string|max:8|unique:users,staff_id',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|confirmed|min:6',
         ]);
 
         // Create the user
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'staff_id' => $request->staff_id, // Store the staff_id if provided
+            'staff_id' => $request->input('staff_id'),
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')), // Hash the password
         ]);
 
-        // Trigger the Registered event
+        // Fire the Registered event
         event(new Registered($user));
 
-        // Log the user in
+        // Log in the user after registration (optional)
         Auth::login($user);
 
-        // Redirect to the Staff Login page with a success message
-        return redirect()->route('staff.login')->with('success', 'Registration successful. Please log in.');
+        // Redirect to the registration page with a success message
+        return redirect()->route('register')->with('success', 'Registration successful! Please login.');
     }
 }
