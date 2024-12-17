@@ -4,13 +4,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\RegisteredUserController; // Add this import
+use App\Http\Controllers\ScholarController; // Import ScholarController
 use Illuminate\Support\Facades\Route;
 
 /*
-|-------------------------------------------------------------------------- 
-| Web Routes 
-|-------------------------------------------------------------------------- 
-| Define web routes for the application. 
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+| Define web routes for the application.
 */
 
 // Public Routes
@@ -36,6 +37,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Add Scholar Route
+    Route::post('/add-scholar', [ScholarController::class, 'addScholar'])->name('add.scholar');
 
     // Logout Route
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
