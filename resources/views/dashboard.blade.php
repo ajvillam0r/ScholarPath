@@ -104,12 +104,23 @@
                 event.preventDefault();
                 return;
             }
-
+        
             if (gpa < 90) {
-                alert('GPA must be 90 or above for Academic Scholars.');
+                // Show the error popup instead of an alert
+                showErrorPopup();
                 event.preventDefault();
                 return;
             }
+        }
+        // Function to show the error popup
+        function showErrorPopup() {
+            const errorPopup = document.getElementById('errorPopup');
+            errorPopup.classList.remove('hidden'); // Make the popup visible
+
+            // Hide the popup after 800 ms
+            setTimeout(() => {
+                errorPopup.classList.add('hidden');
+            }, 800); // Popup will disappear after 3 seconds
         }
 
         showSuccessPopup();
@@ -235,26 +246,33 @@
             </form>
         </div>
 
+        <!-- Error Popup -->
+        <div id="errorPopup" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-50 w-1/3 text-center">
+                <p class="text-red-600 font-bold">Not Qualified. GPA must not below 90.</p>
+            </div>
+        </div>
+
+
         <!-- Modal for Managing Scholarships -->
         <div id="scholarModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div class="bg-white p-8 rounded-lg w-2/3 max-w-5xl shadow-2xl relative">
-                <h3 class="text-2xl font-semibold mb-4">Manage Scholarships</h3>
-                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-700 text-3xl">&times;</button>
+        <div class="bg-white p-8 rounded-lg w-11/12 md:w-2/3 max-w-5xl shadow-2xl relative">
+            <h3 class="text-3xl font-semibold mb-4 text-blue-500">Manage Scholarships</h3>
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-700 text-3xl">&times;</button>
 
-                <!-- Display Scholars Data -->
-                <div class="overflow-y-auto max-h-[600px]">
-                    <table class="min-w-full table-auto border-collapse">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="px-4 py-2 text-left font-semibold">Student ID</th>
-                                <th class="px-4 py-2 text-left font-semibold">Name</th>
-                                <th class="px-4 py-2 text-left font-semibold">Course</th>
-                                <th class="px-4 py-2 text-left font-semibold">Year Level</th>
-                                <th class="px-4 py-2 text-left font-semibold">Scholarship Type</th>
-                                <th class="px-4 py-2 text-left font-semibold">GPA</th>
-                                <th class="px-4 py-2 text-left font-semibold">Category</th>
-                            </tr>
-                        </thead>
+            <div class="overflow-y-auto max-h-[600px]">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-blue-100">
+                        <tr>
+                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Student ID</th>
+                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Name</th>
+                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Course</th>
+                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Year Level</th>
+                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Scholarship Type</th>
+                            <th class="px-4 py-2 text-left font-semibold text-blue-700">GPA</th>
+                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Category</th>
+                        </tr>
+                    </thead>
                         <tbody class="bg-white">
                             @forelse($scholars as $scholar)
                                 <tr>
@@ -276,8 +294,6 @@
                 </div>
             </div>
         </div>
-
-
     </div>
 </body>
 </html>
