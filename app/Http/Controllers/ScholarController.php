@@ -40,4 +40,13 @@ class ScholarController extends Controller
         // Redirect with success message
         return redirect()->back()->with('success', 'Scholar added successfully!');
     }
+
+    public function showScholarships()
+    {
+        // Fetch the scholars from the 'manage_scholars' table
+        $scholars = DB::table('manage_scholars')->get();
+
+        // Pass the $scholars variable to the view
+        return view('dashboard', compact('scholars'));
+    }
 }

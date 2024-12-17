@@ -30,7 +30,7 @@ Route::post('staff/login', [LoginController::class, 'login']);
 // Dashboard Routes (Requires Authentication)
 Route::middleware(['auth', 'verified'])->group(function () {
     // Single dashboard route
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [ScholarController::class, 'showScholarships'])->name('dashboard');
     Route::post('/dashboard/filter', [DashboardController::class, 'filter'])->name('dashboard.filter');
 
     // Profile Routes
@@ -43,6 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Logout Route
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    
+    Route::get('/manage-scholarships', [ScholarshipController::class, 'showScholarships'])->name('manage.scholarships');
+
 });
 
 // Include Authentication Routes

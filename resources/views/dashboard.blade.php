@@ -237,12 +237,47 @@
 
         <!-- Modal for Managing Scholarships -->
         <div id="scholarModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div class="bg-white p-6 rounded-lg w-1/3 shadow-lg">
-                <h3 class="text-xl font-semibold mb-4">Manage Scholarships</h3>
-                <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-700">×</button>
-                <p>Scholarship Management Options Here...</p>
+            <div class="bg-white p-8 rounded-lg w-2/3 max-w-5xl shadow-2xl relative">
+                <h3 class="text-2xl font-semibold mb-4">Manage Scholarships</h3>
+                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-700 text-3xl">&times;</button>
+
+                <!-- Display Scholars Data -->
+                <div class="overflow-y-auto max-h-[600px]">
+                    <table class="min-w-full table-auto border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-semibold">Student ID</th>
+                                <th class="px-4 py-2 text-left font-semibold">Name</th>
+                                <th class="px-4 py-2 text-left font-semibold">Course</th>
+                                <th class="px-4 py-2 text-left font-semibold">Year Level</th>
+                                <th class="px-4 py-2 text-left font-semibold">Scholarship Type</th>
+                                <th class="px-4 py-2 text-left font-semibold">GPA</th>
+                                <th class="px-4 py-2 text-left font-semibold">Category</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white">
+                            @forelse($scholars as $scholar)
+                                <tr>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->student_id }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->first_name }} {{ $scholar->last_name }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->course }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->year_level }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->scholarship_type }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->gpa }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->category }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="px-4 py-2 text-center text-gray-500">No scholars found</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+
+
     </div>
 </body>
 </html>
