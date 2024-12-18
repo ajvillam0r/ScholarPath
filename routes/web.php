@@ -45,6 +45,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     
     Route::get('/manage-scholarships', [ScholarshipController::class, 'showScholarships'])->name('manage.scholarships');
+    Route::post('/update-scholar/{id}', [ScholarController::class, 'updateScholar']);
+    Route::delete('/delete-scholar/{id}', [ScholarController::class, 'deleteScholar']);
 
 });
 

@@ -17,6 +17,23 @@
             display: none;
             height: 2.5rem; /* Adjust the height to match the height of the text */
         }
+        /* Add scroll functionality for the modal */
+#scholarModal .bg-white {
+    max-height: 80vh; /* Ensure it does not exceed the viewport height */
+    overflow-y: scroll; /* Enable vertical scrolling */
+}
+
+/* Hide scrollbar and scroll box for webkit browsers (Chrome, Safari) */
+#scholarModal .bg-white::-webkit-scrollbar {
+    width: 0px; /* Set width to 0 to hide the scrollbar */
+    height: 0px; /* Set height to 0 if it's a horizontal scrollbar */
+}
+
+/* Hide scrollbar for Firefox */
+#scholarModal .bg-white {
+    scrollbar-width: none; /* For Firefox */
+}
+
     </style>
 </head>
 <body class="bg-gray-100">
@@ -25,12 +42,71 @@
         // Attach event listeners when the DOM content is fully loaded
         document.getElementById('scholarshipType').addEventListener('change', toggleGPAField);
         document.getElementById('gpa').addEventListener('input', setCategory);
+        
+        // Attach event listeners for table rows and edit buttons
+        const rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(row => {
+            row.addEventListener('click', () => selectRow(row));
+            const editButton = row.querySelector('.edit-button');
+            if (editButton) {
+                editButton.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent row selection
+                    editScholar(editButton);
+                });
+            }
+        });
     });
 
-    /**
-     * Toggles the visibility of GPA and Category fields 
-     * based on the selected scholarship type.
-     */
+    let selectedRow = null;
+
+    function selectRow(row) {
+        // Remove highlight and Edit button from the previous selection
+        if (selectedRow) {
+            selectedRow.classList.remove("bg-blue-100", "text-blue-700");
+            const editButton = selectedRow.querySelector(".edit-button");
+            if (editButton) editButton.classList.add("hidden");
+        }
+
+        // Highlight the selected row
+        row.classList.add("bg-blue-100", "text-blue-700");
+        selectedRow = row;
+
+        // Show the Edit button in the Action column
+        const editButton = row.querySelector(".edit-button");
+        if (editButton) editButton.classList.remove("hidden");
+    }
+
+    function editScholar(button) {
+        const row = button.closest("tr");
+
+        document.getElementById("editSection").classList.remove("hidden");
+
+        document.getElementById("editName").value = row.cells[1].textContent;
+        document.getElementById("editCourse").value = row.cells[2].textContent;
+        document.getElementById("editYearLevel").value = row.cells[3].textContent;
+        document.getElementById("editScholarshipType").value = row.cells[4].textContent;
+        document.getElementById("editGpa").value = row.cells[5].textContent;
+        document.getElementById("editCategory").value = row.cells[6].textContent;
+    }
+
+    function saveChanges() {
+        if (selectedRow) {
+            selectedRow.cells[1].textContent = document.getElementById("editName").value;
+            selectedRow.cells[2].textContent = document.getElementById("editCourse").value;
+            selectedRow.cells[3].textContent = document.getElementById("editYearLevel").value;
+            selectedRow.cells[4].textContent = document.getElementById("editScholarshipType").value;
+            selectedRow.cells[5].textContent = document.getElementById("editGpa").value;
+            selectedRow.cells[6].textContent = document.getElementById("editCategory").value;
+
+            document.getElementById("editSection").classList.add("hidden");
+        }
+    }
+
+    function cancelEdit() {
+        document.getElementById("editSection").classList.add("hidden");
+    }
+
+    // The rest of your existing functions remain unchanged
     function toggleGPAField() {
         const scholarshipType = document.getElementById('scholarshipType').value;
         const gpaField = document.getElementById('gpaField');
@@ -47,13 +123,6 @@
         }
     }
 
-    /**
-     * Sets the category based on the GPA input.
-     * Categories:
-     *   - Category 1: GPA 98–100
-     *   - Category 2: GPA 95–97
-     *   - Category 3: GPA 90–94
-     */
     function setCategory() {
         const gpaInput = document.getElementById('gpa');
         const categoryField = document.getElementById('category');
@@ -68,19 +137,13 @@
             categoryField.value = 'Category 1';
         } else if (gpa >= 95 && gpa <= 97) {
             categoryField.value = 'Category 2';
-        } else if (gpa >= 90 && gpa <= 94) {
+ } else if (gpa >= 90 && gpa <= 94) {
             categoryField.value = 'Category 3';
         } else {
             categoryField.value = ''; // Outside GPA range, no category assigned
         }
     }
 
-    /**
-     * Validates the form fields before submission.
-     * Ensures:
-     *   - All required fields are filled.
-     *   - GPA is valid and ≥ 90 for Academic Scholars.
-     */
     function validateForm(event) {
         const scholarshipType = document.getElementById('scholarshipType').value;
         const studentId = document.getElementById('studentId').value.trim();
@@ -106,73 +169,37 @@
             }
         
             if (gpa < 90) {
-                // Show the error popup instead of an alert
                 showErrorPopup();
                 event.preventDefault();
                 return;
             }
         }
-        // Function to show the error popup
-        function showErrorPopup() {
-            const errorPopup = document.getElementById('errorPopup');
-            errorPopup.classList.remove('hidden'); // Make the popup visible
-
-            // Hide the popup after 800 ms
-            setTimeout(() => {
-                errorPopup.classList.add('hidden');
-            }, 800); // Popup will disappear after 3 seconds
-        }
 
         showSuccessPopup();
     }
 
-    /**
-     * Displays the success popup for 2 seconds.
-     */
+    function showErrorPopup() {
+        const errorPopup = document.getElementById('errorPopup');
+        errorPopup.classList.remove('hidden'); // Make the popup visible
+
+        setTimeout(() => {
+            errorPopup.classList.add('hidden');
+        }, 800); // Popup will disappear after 800 ms
+    }
+
     function showSuccessPopup() {
         const popup = document.getElementById('successPopup');
         popup.classList.remove('hidden');
         setTimeout(() => popup.classList.add('hidden'), 2000);
     }
 
-    /**
-     * Opens the Manage Scholarships modal.
-     */
     function openModal() {
         document.getElementById('scholarModal').classList.remove('hidden');
     }
 
-    /**
-     * Closes the Manage Scholarships modal.
-     */
     function closeModal() {
         document.getElementById('scholarModal').classList.add('hidden');
     }
-    let selectedRow = null;
-
-function selectRow(row) {
-    // Remove highlight and Edit button from the previous selection
-    if (selectedRow) {
-        selectedRow.classList.remove("bg-blue-100", "text-blue-700");
-        const editButton = selectedRow.querySelector(".edit-button");
-        if (editButton) editButton.classList.add("hidden");
-    }
-
-    // Highlight the selected row
-    row.classList.add("bg-blue-100", "text-blue-700");
-    selectedRow = row;
-
-    // Show the Edit button in the Action column
-    const editButton = row.querySelector(".edit-button");
-    if (editButton) editButton.classList.remove("hidden");
-}
-
-function editScholar(button) {
-    const row = button.closest("tr");
-    const studentId = row.cells[0].textContent; // Example: Access Student ID
-    alert(`Edit button clicked for Student ID: ${studentId}`);
-    // Implement the edit functionality here
-}
 </script>
 
     <!-- Success Popup -->
@@ -281,50 +308,96 @@ function editScholar(button) {
 
         <!-- Modal for Managing Scholarships -->
         <div id="scholarModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div class="bg-white p-8 rounded-lg w-11/12 md:w-3/4 max-w-6xl shadow-2xl relative">
-        <h3 class="text-3xl font-semibold mb-4 text-blue-500">Manage Scholarships</h3>
-        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-700 text-3xl">&times;</button>
+            <div class="bg-white p-8 rounded-lg w-11/12 md:w-3/4 max-w-6xl shadow-2xl relative">
+                <h3 class="text-3xl font-semibold mb-4 text-blue-500">Manage Scholarships</h3>
+                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-700 text-3xl">&times;</button>
 
-        <div class="overflow-y-auto max-h-[600px]">
-            <table class="min-w-full table-auto border-collapse">
-                <thead class="bg-blue-100">
-                    <tr>
-                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Student ID</th>
-                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Name</th>
-                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Course</th>
-                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Year Level</th>
-                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Scholarship Type</th>
-                        <th class="px-4 py-2 text-left font-semibold text-blue-700">GPA</th>
-                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Category</th>
-                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white">
-                    @forelse($scholars as $scholar)
-                        <tr class="hover:bg-gray-200 cursor-pointer" onclick="selectRow(this)">
-                            <td class="px-4 py-2 border-b">{{ $scholar->student_id }}</td>
-                            <td class="px-4 py-2 border-b">{{ $scholar->first_name }} {{ $scholar->last_name }}</td>
-                            <td class="px-4 py-2 border-b">{{ $scholar->course }}</td>
-                            <td class="px-4 py-2 border-b">{{ $scholar->year_level }}</td>
-                            <td class="px-4 py-2 border-b">{{ $scholar->scholarship_type }}</td>
-                            <td class="px-4 py-2 border-b">{{ $scholar->gpa }}</td>
-                            <td class="px-4 py-2 border-b">{{ $scholar->category }}</td>
-                            <td class="px-4 py-2 border-b text-center">
-                                <button class="hidden edit-button bg-blue-500 text-white px-3 py-1 rounded" onclick="editScholar(this)">
-                                    Edit
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="px-4 py-2 text-center text-gray-500">No scholars found</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                <!-- Editable Inputs -->
+                <div id="editSection" class="hidden mb-4">
+                    <h4 class="text-xl font-semibold mb-2 text-blue-600">Edit Scholar Details</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="editName" class="block text-gray-700 font-semibold">Name:</label>
+                            <input id="editName" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="Enter full name" />
+                        </div>
+                        <div>
+                            <label for="editCourse" class="block text-gray-700 font-semibold">Course:</label>
+                            <input id="editCourse" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="Enter course" />
+                        </div>
+                        <div>
+                            <label for="editYearLevel" class="block text-gray-700 font-semibold">Year Level:</label>
+                            <input id="editYearLevel" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="Enter year level" />
+                        </div>
+                        <div>
+                            <label for="editScholarshipType" class="block text-gray-700 font-semibold">Scholarship Type:</label>
+                            <select id="editScholarshipType" class="w-full px-4 py-2 border rounded-lg">
+                                <option value="" disabled selected>Select scholarship type</option>
+                                <option value="Academic Scholars">Academic Scholars</option>
+                                <option value="Presidential Scholars">Presidential Scholarship</option>
+                                <option value="Athlete">Athletics</option>
+                                <!-- Add more options as needed -->
+                            </select>
+                        </div>
+                        <div id="editGpaField" class="hidden">
+                            <label for="editGpa" class="block text-gray-700 font-semibold">GPA:</label>
+                            <input id="editGpa" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="Enter GPA" />
+                        </div>
+                        <div id="editCategoryField" class="hidden">
+                            <label for="editCategory" class="block text-gray-700 font-semibold">Category:</label>
+                            <input id="editCategory" type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="Enter category" readonly />
+                        </div>
+                    </div>
+                    <div class="flex mt-4">
+                        <button onclick="saveChanges()" class="bg-green-500 text-white px-4 py-2 rounded-lg">Save Changes</button>
+                        <button onclick="cancelEdit()" class="ml-4 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">Cancel</button>
+                        <!-- Delete Button -->
+                        <button onclick="deleteScholar()" class="ml-4 bg-red-500 text-white px-4 py-2 rounded-lg">Delete Scholar</button>
+                    </div>
+                </div>
+
+
+                <!-- Table -->
+                <div class="overflow-y-auto max-h-[600px]">
+                    <table class="min-w-full table-auto border-collapse">
+                        <thead class="bg-blue-100">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-semibold text-blue-700">Student ID</th>
+                                <th class="px-4 py-2 text-left font-semibold text-blue-700">Name</th>
+                                <th class="px-4 py-2 text-left font-semibold text-blue-700">Course</th>
+                                <th class="px-4 py-2 text-left font-semibold text-blue-700">Year Level</th>
+                                <th class="px-4 py-2 text-left font-semibold text-blue-700">Scholarship Type</th>
+                                <th class="px-4 py-2 text-left font-semibold text-blue-700">GPA</th>
+                                <th class="px-4 py-2 text-left font-semibold text-blue-700">Category</th>
+                                <th class="px-4 py-2 text-left font-semibold text-blue-700">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white">
+                            @forelse($scholars as $scholar)
+                                <tr class="hover:bg-gray-200 cursor-pointer" onclick="selectRow(this)">
+                                    <td class="px-4 py-2 border-b">{{ $scholar->student_id }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->first_name }} {{ $scholar->last_name }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->course }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->year_level }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->scholarship_type }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->gpa }}</td>
+                                    <td class="px-4 py-2 border-b">{{ $scholar->category }}</td>
+                                    <td class="px-4 py-2 border-b text-center">
+                                        <button class="hidden edit-button bg-blue-500 text-white px-3 py-1 rounded" onclick="editScholar(this)">
+                                            Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="px-4 py-2 text-center text-gray-500">No scholars found</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+
     </div>
 </body>
 </html>
