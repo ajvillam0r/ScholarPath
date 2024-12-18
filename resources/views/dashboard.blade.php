@@ -148,6 +148,31 @@
     function closeModal() {
         document.getElementById('scholarModal').classList.add('hidden');
     }
+    let selectedRow = null;
+
+function selectRow(row) {
+    // Remove highlight and Edit button from the previous selection
+    if (selectedRow) {
+        selectedRow.classList.remove("bg-blue-100", "text-blue-700");
+        const editButton = selectedRow.querySelector(".edit-button");
+        if (editButton) editButton.classList.add("hidden");
+    }
+
+    // Highlight the selected row
+    row.classList.add("bg-blue-100", "text-blue-700");
+    selectedRow = row;
+
+    // Show the Edit button in the Action column
+    const editButton = row.querySelector(".edit-button");
+    if (editButton) editButton.classList.remove("hidden");
+}
+
+function editScholar(button) {
+    const row = button.closest("tr");
+    const studentId = row.cells[0].textContent; // Example: Access Student ID
+    alert(`Edit button clicked for Student ID: ${studentId}`);
+    // Implement the edit functionality here
+}
 </script>
 
     <!-- Success Popup -->
@@ -256,44 +281,50 @@
 
         <!-- Modal for Managing Scholarships -->
         <div id="scholarModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div class="bg-white p-8 rounded-lg w-11/12 md:w-2/3 max-w-5xl shadow-2xl relative">
-            <h3 class="text-3xl font-semibold mb-4 text-blue-500">Manage Scholarships</h3>
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-700 text-3xl">&times;</button>
+    <div class="bg-white p-8 rounded-lg w-11/12 md:w-3/4 max-w-6xl shadow-2xl relative">
+        <h3 class="text-3xl font-semibold mb-4 text-blue-500">Manage Scholarships</h3>
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-700 text-3xl">&times;</button>
 
-            <div class="overflow-y-auto max-h-[600px]">
-                <table class="min-w-full table-auto border-collapse">
-                    <thead class="bg-blue-100">
-                        <tr>
-                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Student ID</th>
-                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Name</th>
-                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Course</th>
-                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Year Level</th>
-                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Scholarship Type</th>
-                            <th class="px-4 py-2 text-left font-semibold text-blue-700">GPA</th>
-                            <th class="px-4 py-2 text-left font-semibold text-blue-700">Category</th>
+        <div class="overflow-y-auto max-h-[600px]">
+            <table class="min-w-full table-auto border-collapse">
+                <thead class="bg-blue-100">
+                    <tr>
+                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Student ID</th>
+                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Name</th>
+                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Course</th>
+                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Year Level</th>
+                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Scholarship Type</th>
+                        <th class="px-4 py-2 text-left font-semibold text-blue-700">GPA</th>
+                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Category</th>
+                        <th class="px-4 py-2 text-left font-semibold text-blue-700">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white">
+                    @forelse($scholars as $scholar)
+                        <tr class="hover:bg-gray-200 cursor-pointer" onclick="selectRow(this)">
+                            <td class="px-4 py-2 border-b">{{ $scholar->student_id }}</td>
+                            <td class="px-4 py-2 border-b">{{ $scholar->first_name }} {{ $scholar->last_name }}</td>
+                            <td class="px-4 py-2 border-b">{{ $scholar->course }}</td>
+                            <td class="px-4 py-2 border-b">{{ $scholar->year_level }}</td>
+                            <td class="px-4 py-2 border-b">{{ $scholar->scholarship_type }}</td>
+                            <td class="px-4 py-2 border-b">{{ $scholar->gpa }}</td>
+                            <td class="px-4 py-2 border-b">{{ $scholar->category }}</td>
+                            <td class="px-4 py-2 border-b text-center">
+                                <button class="hidden edit-button bg-blue-500 text-white px-3 py-1 rounded" onclick="editScholar(this)">
+                                    Edit
+                                </button>
+                            </td>
                         </tr>
-                    </thead>
-                        <tbody class="bg-white">
-                            @forelse($scholars as $scholar)
-                                <tr>
-                                    <td class="px-4 py-2 border-b">{{ $scholar->student_id }}</td>
-                                    <td class="px-4 py-2 border-b">{{ $scholar->first_name }} {{ $scholar->last_name }}</td>
-                                    <td class="px-4 py-2 border-b">{{ $scholar->course }}</td>
-                                    <td class="px-4 py-2 border-b">{{ $scholar->year_level }}</td>
-                                    <td class="px-4 py-2 border-b">{{ $scholar->scholarship_type }}</td>
-                                    <td class="px-4 py-2 border-b">{{ $scholar->gpa }}</td>
-                                    <td class="px-4 py-2 border-b">{{ $scholar->category }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="px-4 py-2 text-center text-gray-500">No scholars found</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="px-4 py-2 text-center text-gray-500">No scholars found</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+    </div>
+</div>
     </div>
 </body>
 </html>
